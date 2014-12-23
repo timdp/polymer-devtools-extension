@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import os
+import shutil
 
 # Check if it is a clean or a build
 args = sys.argv
@@ -29,50 +30,54 @@ def copyFilesToBuild (files, silentFail):
   '''Copies a list of files to build/'''
   for aFile in files:
     print 'copying ' + aFile + ' to build/' + aFile + '...'
-    execCmd('cp ' + aFile + ' build/' + aFile, silentFail)
+    shutil.copy(aFile, 'build')
 
 def copyDirectoriesToBuild (dirs, silentFail):
   '''Copies a list of directories to build/'''
   for aDir in dirs:
     print 'copying ' + aDir + ' to build/' + aDir + '...'
-    execCmd('cp -r ' + aDir + ' build/' + aDir, silentFail)
+    shutil.copytree(aDir, 'build/' + aDir)
 
 def moveToBuild (files, silentFail):
   '''Moves a list of files to build/'''
   for aFile in files:
     print 'moving ' + aFile + ' to build/' + aFile + '...'
-    execCmd('mv ' + aFile + ' build/' + aFile, silentFail)
+    shutil.move(aFile, 'build/' + aFile)
 
 def removeFiles (files, silentFail):
   '''Removes a list of files from pwd'''
   for aFile in files:
     print 'removing ' + aFile + '...'
-    execCmd('rm ' + aFile, silentFail)
+    try:
+      os.remove(aFile)
+    except:
+      if silentFail is False:
+        raise;
 
 def removeDirectories (dirs, silentFail):
   '''Removes a list of files from pwd'''
   for aDir in dirs:
     print 'removing ' + aDir + '...'
-    execCmd('rm -r ' + aDir, silentFail)
+    shutil.rmtree(aDir)
 
 def closureCompile (srcs, dest):
   '''Compiles each file in `srcs` and puts results as `dest`'''
   for aSrc in srcs:
     print 'Compiling ' + aSrc + ' to ' + dest + '/' + aSrc + '...'
-    execCmd('java -jar ~/closureCompiler/compiler.jar ' +
+    execCmd('java -jar closureCompiler/compiler.jar ' +
       '--language_in=ECMASCRIPT5 --js ' +
       aSrc + ' --js_output_file ' + dest + '/' + aSrc, silentFail=False)
 
 def createDirectoryStructure ():
   print 'Creating directory structure...'
-  execCmd('mkdir build', silentFail=False)
-  execCmd('mkdir build/bower_components', silentFail=False)
-  execCmd('mkdir build/bower_components/platform', silentFail=False)
-  execCmd('mkdir build/bower_components/polymer', silentFail=False)
+  os.mkdir('build')
+  os.mkdir('build/bower_components')
+  os.mkdir('build/bower_components/platform')
+  os.mkdir('build/bower_components/polymer')
 
   # core-splitter needs an svg resource. vulcanize doesn't put resources in concatenated
   # file. So we must manually copy that build/ .
-  execCmd('mkdir build/bower_components/core-splitter', silentFail=False)
+  os.mkdir('build/bower_components/core-splitter')
 
 
 print 'Cleaning project...\n'
